@@ -1,0 +1,399 @@
+﻿<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول المذاكرة - رمضان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0a0119, #1a0033);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(45deg, #4a006d, #2d0042);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(106, 0, 255, 0.3);
+        }
+
+        .week-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .week-btn {
+            padding: 1rem;
+            background: #1a0033;
+            border: 2px solid #4d004d;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+        }
+
+        .week-btn:hover {
+            background: #4d004d;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(77, 0, 77, 0.3);
+        }
+
+        #day-selector {
+            width: 100%;
+            padding: 1rem;
+            margin: 2rem 0;
+            background: #1a0033;
+            border: 2px solid #4d004d;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        #schedule {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1a0033;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 2rem 0;
+            display: none;
+            box-shadow: 0 0 20px rgba(106, 0, 255, 0.1);
+        }
+
+        #schedule th {
+            background: linear-gradient(45deg, #4d004d, #2d0042);
+            padding: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        #schedule td {
+            padding: 1.2rem;
+            border-bottom: 1px solid #4d004d;
+            text-align: center;
+        }
+
+        .tasks-section, .notes-section, .calendar-section {
+            background: #1a0033;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            box-shadow: 0 0 20px rgba(106, 0, 255, 0.1);
+        }
+
+        #task-input, #note-input {
+            width: 70%;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: #0a0119;
+            border: 2px solid #4d004d;
+            border-radius: 10px;
+            color: #fff;
+        }
+
+        .task-item, .note-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #0a0119;
+            border-radius: 10px;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover, .note-item:hover {
+            background: #15002b;
+        }
+
+        .calendar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .calendar div {
+            margin: 1rem;
+        }
+
+        .calendar span {
+            font-size: 1.2rem;
+            color: #b300b3;
+            font-weight: 700;
+        }
+
+        #clock {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #1a0033;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 2px solid #4d004d;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>⏳ جدول المذاكرة الرمضاني 📚</h1>
+        </header>
+
+        <div class="week-buttons">
+            <button class="week-btn" onclick="selectWeek(1)">الأسبوع الأول</button>
+            <button class="week-btn" onclick="selectWeek(2)">الأسبوع الثاني</button>
+            <button class="week-btn" onclick="selectWeek(3)">الأسبوع الثالث</button>
+            <button class="week-btn" onclick="selectWeek(4)">الأسبوع الرابع</button>
+        </div>
+
+        <select id="day-selector" onchange="showSchedule()">
+            <option value="">اختر اليوم</option>
+            <option value="السبت">السبت</option>
+            <option value="الأحد">الأحد</option>
+            <option value="الاثنين">الاثنين</option>
+            <option value="الثلاثاء">الثلاثاء</option>
+            <option value="الأربعاء">الأربعاء</option>
+            <option value="الخميس">الخميس</option>
+            <option value="الجمعة">الجمعة</option>
+        </select>
+
+        <table id="schedule">
+            <thead>
+                <tr>
+                    <th>الوقت ⏰</th>
+                    <th>المادة 📖</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body"></tbody>
+        </table>
+
+        <section class="tasks-section">
+            <h2>📝 المهام اليومية</h2>
+            <input type="text" id="task-input" placeholder="أضف مهمة جديدة...">
+            <button class="week-btn" onclick="addTask()">إضافة ➕</button>
+            <div id="tasks-list"></div>
+        </section>
+
+        <section class="notes-section">
+            <h2>📝 الملاحظات اليومية</h2>
+            <input type="text" id="note-input" placeholder="أضف ملاحظة جديدة...">
+            <button class="week-btn" onclick="addNote()">إضافة ➕</button>
+            <div id="notes-list"></div>
+        </section>
+
+        <section class="calendar-section">
+            <h2>📅 التقويم</h2>
+            <div class="calendar">
+                <div>
+                    <span>التاريخ الهجري:</span>
+                    <div id="hijri-date"></div>
+                </div>
+                <div>
+                    <span>التاريخ الميلادي:</span>
+                    <div id="gregorian-date"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="clock"></div>
+
+    <script>
+        const schedules = {
+            1: {
+                "السبت": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "النحو"]],
+                "الأحد": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الصرف"]],
+                "الاثنين": [["4:00 - 5:00 صباحًا", "أحياء"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "الأدب"]],
+                "الثلاثاء": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الحديث"]],
+                "الأربعاء": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "أحياء"], ["12:00 - 1:00 ظهرًا", "القرآن"]],
+                "الخميس": [["4:00 - 5:00 صباحًا", "مراجعة عامة"], ["5:00 - 6:00 صباحًا", "مراجعة عامة"], ["12:00 - 1:00 ظهرًا", "مراجعة عامة"]],
+                "الجمعة": [["4:00 - 5:00 صباحًا", "قراءة قرآن"], ["5:00 - 6:00 صباحًا", "حل تمارين"], ["12:00 - 1:00 ظهرًا", "استراحة"]]
+            },
+            2: {
+                "السبت": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "الفقه"]],
+                "الأحد": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الصرف"]],
+                "الاثنين": [["4:00 - 5:00 صباحًا", "أحياء"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "التوحيد"]],
+                "الثلاثاء": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الحديث"]],
+                "الأربعاء": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "أحياء"], ["12:00 - 1:00 ظهرًا", "القرآن"]],
+                "الخميس": [["4:00 - 5:00 صباحًا", "مراجعة عامة"], ["5:00 - 6:00 صباحًا", "مراجعة عامة"], ["12:00 - 1:00 ظهرًا", "مراجعة عامة"]],
+                "الجمعة": [["4:00 - 5:00 صباحًا", "قراءة قرآن"], ["5:00 - 6:00 صباحًا", "حل تمارين"], ["12:00 - 1:00 ظهرًا", "استراحة"]]
+            },
+            3: {
+                "السبت": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "النحو"]],
+                "الأحد": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الصرف"]],
+                "الاثنين": [["4:00 - 5:00 صباحًا", "أحياء"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "الأدب"]],
+                "الثلاثاء": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الحديث"]],
+                "الأربعاء": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "أحياء"], ["12:00 - 1:00 ظهرًا", "القرآن"]],
+                "الخميس": [["4:00 - 5:00 صباحًا", "مراجعة عامة"], ["5:00 - 6:00 صباحًا", "مراجعة عامة"], ["12:00 - 1:00 ظهرًا", "مراجعة عامة"]],
+                "الجمعة": [["4:00 - 5:00 صباحًا", "قراءة قرآن"], ["5:00 - 6:00 صباحًا", "حل تمارين"], ["12:00 - 1:00 ظهرًا", "استراحة"]]
+            },
+            4: {
+                "السبت": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "الفقه"]],
+                "الأحد": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الصرف"]],
+                "الاثنين": [["4:00 - 5:00 صباحًا", "أحياء"], ["5:00 - 6:00 صباحًا", "فيزياء"], ["12:00 - 1:00 ظهرًا", "التوحيد"]],
+                "الثلاثاء": [["4:00 - 5:00 صباحًا", "رياضيات بحتة"], ["5:00 - 6:00 صباحًا", "كيمياء"], ["12:00 - 1:00 ظهرًا", "الحديث"]],
+                "الأربعاء": [["4:00 - 5:00 صباحًا", "رياضيات تطبيقية"], ["5:00 - 6:00 صباحًا", "أحياء"], ["12:00 - 1:00 ظهرًا", "القرآن"]],
+                "الخميس": [["4:00 - 5:00 صباحًا", "مراجعة عامة"], ["5:00 - 6:00 صباحًا", "مراجعة عامة"], ["12:00 - 1:00 ظهرًا", "مراجعة عامة"]],
+                "الجمعة": [["4:00 - 5:00 صباحًا", "قراءة قرآن"], ["5:00 - 6:00 صباحًا", "حل تمارين"], ["12:00 - 1:00 ظهرًا", "استراحة"]]
+            }
+        };
+
+        let currentWeek = null;
+
+        function selectWeek(week) {
+            currentWeek = week;
+            document.getElementById("day-selector").style.display = "block";
+            document.getElementById("schedule").style.display = "none";
+        }
+
+        function showSchedule() {
+            const day = document.getElementById("day-selector").value;
+            if (!day || !currentWeek) return;
+
+            const tbody = document.getElementById("schedule-body");
+            tbody.innerHTML = "";
+
+            schedules[currentWeek][day].forEach(item => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item[0]}</td>
+                    <td>${item[1]}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById("schedule").style.display = "table";
+        }
+
+        function addTask() {
+            const input = document.getElementById("task-input");
+            if (!input.value.trim()) return;
+
+            const taskItem = document.createElement("div");
+            taskItem.className = "task-item";
+            taskItem.innerHTML = `
+                <span>${input.value}</span>
+                <div>
+                    <button onclick="editItem(this, 'task')">✏️</button>
+                    <button onclick="this.parentElement.parentElement.remove()">🗑️</button>
+                </div>
+            `;
+            document.getElementById("tasks-list").appendChild(taskItem);
+            input.value = "";
+            saveData('tasks');
+        }
+
+        function addNote() {
+            const input = document.getElementById("note-input");
+            if (!input.value.trim()) return;
+
+            const noteItem = document.createElement("div");
+            noteItem.className = "note-item";
+            noteItem.innerHTML = `
+                <span>${input.value}</span>
+                <div>
+                    <button onclick="editItem(this, 'note')">✏️</button>
+                    <button onclick="this.parentElement.parentElement.remove(); saveData('notes')">🗑️</button>
+                </div>
+            `;
+            document.getElementById("notes-list").appendChild(noteItem);
+            input.value = "";
+            saveData('notes');
+        }
+
+        function editItem(button, type) {
+            const item = button.parentElement.parentElement;
+            const span = item.querySelector('span');
+            const currentText = span.textContent;
+            const newText = prompt("تعديل النص:", currentText);
+            
+            if (newText && newText.trim()) {
+                span.textContent = newText.trim();
+                saveData(type + 's');
+            }
+        }
+
+        function saveData(type) {
+            const list = document.getElementById(type + '-list');
+            const items = Array.from(list.getElementsByTagName('span')).map(span => span.textContent);
+            localStorage.setItem(type, JSON.stringify(items));
+        }
+
+        function loadData(type) {
+            const savedItems = localStorage.getItem(type);
+            if (!savedItems) return;
+
+            const items = JSON.parse(savedItems);
+            const list = document.getElementById(type + '-list');
+            
+            items.forEach(item => {
+                const element = document.createElement("div");
+                element.className = type.slice(0, -1) + '-item';
+                element.innerHTML = `
+                    <span>${item}</span>
+                    <div>
+                        <button onclick="editItem(this, '${type.slice(0, -1)}')">✏️</button>
+                        <button onclick="this.parentElement.parentElement.remove(); saveData('${type}')">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(element);
+            });
+        }
+
+        function updateCalendar() {
+            const now = new Date();
+            const hijriDate = new Intl.DateTimeFormat('ar-TN-u-ca-islamic', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(now);
+
+            const gregorianDate = new Intl.DateTimeFormat('ar-EG', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(now);
+
+            document.getElementById("hijri-date").textContent = hijriDate;
+            document.getElementById("gregorian-date").textContent = gregorianDate;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("clock").textContent = now.toLocaleTimeString('ar-EG');
+        }
+
+        window.onload = function() {
+            loadData('tasks');
+            loadData('notes');
+            updateCalendar();
+            setInterval(updateClock, 1000);
+            updateClock();
+        };
+    </script>
+</body>
+</html
